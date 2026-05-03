@@ -1,0 +1,30 @@
+#data folders
+data/
+*.parquet
+*.csv
+*.json
+
+# Secrets 
+.env
+
+# Python
+__pyache__/
+*.pyc
+venv/
+.venv/
+
+# Airflow
+logs/
+plugins/
+airflow.db
+
+# Jupyter notebooks
+*.ipynb
+.ipynb_checkpoints/
+
+
+# Delta transaction log folders
+**/_delta_log/
+# Delta table files
+*.delta
+
