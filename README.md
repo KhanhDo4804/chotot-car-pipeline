@@ -1,4 +1,4 @@
-# Chotot Used Car Data Pipeline
+# Used Car Martket Pipeline
 
 An end-to-end data engineering pipeline designed to automatically collect, process, orchestrate, and analyze used car market data from Chotot (Vietnam). The system provides intelligence to identify "good deals", analyze depreciation trends of different car models over time, and segment regional trends.
 
@@ -91,5 +91,3 @@ Once the containers are healthy, you can monitor and view the pipeline:
 
 ![Metabase Dashboard Preview](images/Visualization.png)
 
----
-*Created by [Khanh Do]*
