@@ -1,6 +1,6 @@
-An end-to-end data pipeline designed to automatically collect, process, and analyze used car market data from Chotot. The system provides insights to identify “good deals” and analyze depreciation trends of different car models over time.
+# An end-to-end data pipeline designed to automatically collect, process, and analyze used car market data from Chotot. The system provides insights to identify “good deals” and analyze depreciation trends of different car models over time.
 
----
+
 
 ## System Architecture
 
@@ -35,13 +35,12 @@ Based on the Gold layer transformations:
 
 * **Recommendation System**: Scores vehicles based on usage intensity (km/year) and value within a given budget segment.
 
----
 
 ## Dashboard Preview
 
 !(images/Visualization.png)
 
----
+
 
 ## How to Run
 
