@@ -1,63 +1,115 @@
-# An end-to-end data pipeline designed to automatically collect, process, and analyze used car market data from Chotot. The system provides insights to identify “good deals” and analyze depreciation trends of different car models over time.
+# Chotot Used Car Data Pipeline
 
+An end-to-end data engineering pipeline designed to automatically collect, process, orchestrate, and analyze used car market data from Chotot (Vietnam). The system provides intelligence to identify "good deals", analyze depreciation trends of different car models over time, and segment regional trends.
 
+---
 
 ## System Architecture
 
-The data flow follows the Medallion Architecture:
+The data pipeline adopts the Medallion Architecture (Bronze -> Silver -> Gold) for data quality guarantees, orchestrated by Airflow and powered by PySpark & Delta Lake.
 
-* **Crawler**: A Python script that extracts raw data from Chotot.
-* **Bronze Layer**: Stores raw snapshot data.
-* **Silver Layer**: Cleans, standardizes data types, and stores data using Delta Lake (with simulated CDC via change detection).
-* **Gold Layer**: Applies complex business logic using PySpark and loads the results into PostgreSQL.
-* **Visualization**: Interactive dashboards built with Metabase.
+```mermaid
+graph TD
+    A[Chotot.com] -->|Python Crawler / BeautifulSoup| B[(Bronze Layer)]
+    B -->|PySpark / Data Cleaning| C[(Silver Layer)]
+    C -->|CDC / Upsert to Delta Lake| D[(Delta Lake)]
+    D -->|PySpark / Business Aggregations| E[(Gold Layer)]
+    E -->|JDBC| F[(PostgreSQL)]
+    F -->|SQL / Dashboarding| G[Metabase Visualization]
+    
+    subgraph Orchestration
+    H[Apache Airflow] -. orchestrates .-> B
+    H -. orchestrates .-> C
+    H -. orchestrates .-> E
+    end
+```
 
+### Flow Breakdown:
+1. **Crawler**: A scheduled Python script that extracts raw snapshot data recursively from Chotot listings.
+2. **Bronze Layer**: Persistent storage of raw, historical CSV dumps.
+3. **Silver Layer**: PySpark cleans and standardizes data types. It uses Delta Lake to handle Change Data Capture (CDC) and upsert logic for listing prices and availability.
+4. **Gold Layer**: PySpark applies analytical business logic (deal evaluations, depreciation) and loads the final curated dataset into PostgreSQL.
+5. **Visualization**: Interactive dashboards loaded in Metabase connected to the Gold PostgreSQL database.
+
+![Architecture](images/Architecture.png)
+
+---
 
 ## Tech Stack
 
-* **Orchestration**: Apache Airflow
-* **Processing**: PySpark (Spark SQL & DataFrames)
-* **Storage**: Delta Lake, PostgreSQL
-* **Visualization**: Metabase
-* **Infrastructure**: Docker & Docker Compose
-!(images/Architecture.png)
+* **Data Extraction:** Python, BeautifulSoup, Requests, Pandas
+* **Data Processing & ETL:** PySpark (Spark SQL & DataFrames)
+* **Storage Hub:** Delta Lake (Local HDFS simulation)
+* **Data Warehouse / Serving:** PostgreSQL
+* **Orchestration:** Apache Airflow
+* **Infrastructure:** Docker, Docker Compose
+* **Visualization:** Metabase
+
 ---
 
-## FeBusiness Logic
+## Project Structure
 
-Based on the Gold layer transformations:
+```text
+used_car_data_pipeline/
+├── airflow/                 # Airflow DAGs for defining ETL workflows
+├── crawler/                 # Python scripts and notebooks for scraping Chotot
+├── data/                    # Local storage mock for Data Lake
+│   ├── bronze/              # Raw data layer
+│   └── silver/              # Cleaned data layer (Delta Lake format)
+├── docker/                  # Custom Dockerfiles (Airflow, Spark, etc.)
+├── init-db/                 # Postgres initialization scripts
+├── jobs/                    # PySpark jobs (Bronze -> Silver -> Gold)
+├── utils/                   # Shared configurations and helpers
+├── docker-compose.yaml      # Multi-container orchestration setup
+└── requirements.txt         # Python package dependencies
+```
 
-* **Deal Finder**: Automatically compares listing prices against the market median and labels cars priced 15% below the median as “Great Deal”.
+---
 
-* **Depreciation Analysis**: Calculates the annual depreciation rate (%) for each car model.
+## Business Logic & Features
 
-* **Regional Trends**: Ranks the most popular car models by province across Vietnam.
+Based on the highly-curated Gold Layer, this project enables:
 
-* **Recommendation System**: Scores vehicles based on usage intensity (km/year) and value within a given budget segment.
+* **Deal Finder**: Automatically compares listing prices against the market median and labels cars priced 15% below the market standard as an absolute "Great Deal".
+* **Depreciation Analysis**: Calculates the estimated annual depreciation rate (%) for individual car models across varying years of manufacture.
+* **Regional Trends**: Ranks the most popular and available car models mapped by province across Vietnam.
+* **Recommendation System**: Heuristically scores vehicles based on usage intensity (KM/year) and comparative value within given budget segments.
 
-
-## Dashboard Preview
-
-!(images/Visualization.png)
-
-
+---
 
 ## How to Run
 
 ### 1. Clone the repository
-
 ```bash
 git clone https://github.com/KhanhDo4804/chotot-used-car-data-pipeline.git
+cd chotot-used-car-data-pipeline
 ```
 
-### 2. Start the system with Docker
-
+### 2. Start the system
+Stand up the entire architecture (Airflow, Spark standalone, PostgreSQL, Metabase) with one command:
 ```bash
 docker-compose up -d
 ```
 
-### 3. Access services
+### 3. Access Services
 
-* **Airflow**: http://localhost:8080 → trigger DAGs
-!(images/Airflow.png)
-* **Metabase**: http://localhost:3001 → connect to PostgreSQL and view dashboards
+Once the containers are healthy, you can monitor and view the pipeline:
+
+* **Airflow UI**: http://localhost:8080
+  *(Trigger the DAGs here to start the extraction and ETL process)*
+  
+  ![Airflow](images/Airflow.png)
+
+* **PostgreSQL**: localhost:5432 *(Standard access via pgAdmin/DBeaver)*
+
+* **Metabase**: http://localhost:3001
+  *(Connect it to the PostgreSQL data source to visualize insights)*
+
+---
+
+## Dashboard Preview
+
+![Metabase Dashboard Preview](images/Visualization.png)
+
+---
+*Created by [Khanh Do]*
