@@ -19,8 +19,8 @@ An end-to-end data engineering pipeline designed to automatically collect, proce
 ## Tech Stack
 
 * **Data Extraction:** Python, BeautifulSoup, Requests, Pandas
-* **Data Processing & ETL:** PySpark (Spark SQL & DataFrames)
-* **Storage Hub:** Delta Lake (Local HDFS simulation)
+* **Data Processing & ETL:** PySpark 
+* **Storage Hub:** Delta Lake
 * **Data Warehouse / Serving:** PostgreSQL
 * **Orchestration:** Apache Airflow
 * **Infrastructure:** Docker, Docker Compose
